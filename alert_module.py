@@ -5,8 +5,10 @@ import orjson
 
 from update_module import CaseReport
 
+WEBHOOK_URL = "https://hooks.slack.com/services/T00000000/B00000000/X00000000"
 
-async def send_slack_message(webhook_url, case_report: CaseReport):
+
+async def send_slack_message(case_report: CaseReport, webhook_url=WEBHOOK_URL):
     message = parse_case2slack(case_report)
     headers = {"Content-Type": "application/json"}
     payload = orjson.dumps({"text": message})
@@ -54,11 +56,12 @@ def main():
 
     # 發送訊息
     send_slack_message(webhook_url, case_report)
-    
+
     # 【Production】
     # 測試案例: API_TEST_public/get_ohlc_data／報告連結: http://localhost:8000/allure-report/index.html
     # Failed: 2 ／Broken: 1 ／Skip: 1 ／Pass: 6 ／Total: 9
     # 開始時間: 2025-03-11 22:46:35.188384／執行時間: 0:00:00.000004／結束時間: 2025-03-11 22:46:35.188388
+
 
 if __name__ == "__main__":
     main()

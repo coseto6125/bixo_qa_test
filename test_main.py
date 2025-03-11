@@ -4,7 +4,9 @@ from datetime import datetime
 from pathlib import Path
 
 from orjson import loads
+import pytest
 
+from alert_module import send_slack_message
 from bito_front.compare_bitopro_data import BitoProDataComparer
 from update_module import CaseReport, update_google_sheet
 
@@ -17,18 +19,18 @@ def run_api_tests():
     import os
 
     start_time = datetime.now()
-    # import shutil
+    import shutil
 
-    # shutil.rmtree("bito_api_test/allure-results")
+    shutil.rmtree("bito_api_test/allure-results")
 
     # # 執行測試
-    # pytest.main(
-    #     [
-    #         "bito_api_test/tests/",
-    #         "-v",
-    #         "--alluredir=bito_api_test/allure-results",
-    #     ]
-    # )
+    pytest.main(
+        [
+            "bito_api_test/tests/",
+            "-v",
+            "--alluredir=bito_api_test/allure-results",
+        ]
+    )
     # 讀取 JSON 檔案
     result_json = Path("bito_api_test/allure-results").glob("*-result.json")
 
@@ -68,6 +70,7 @@ def run_api_tests():
         EndTime=end_time,
     )
     update_google_sheet(case_report, "生產環境")
+    send_slack_message(case_report)
 
 
 async def run_front_tests():
@@ -93,8 +96,16 @@ async def run_front_tests():
         EndTime=end_time,
     )
     update_google_sheet(case_report, "生產環境2")
-
+    send_slack_message(case_report)
 
 if __name__ == "__main__":
-    asyncio.run(run_front_tests()) # 執行前端測試
-    run_api_tests() # 執行API測試
+    start_time = datetime.now()
+    asyncio.run(run_front_tests())  # 執行前端測試
+    end_time = datetime.now()
+    run_time = end_time - start_time
+    print(f"執行前端測試時間: {run_time}")
+    start_time = datetime.now()
+    run_api_tests()  # 執行API測試
+    end_time = datetime.now()
+    run_time = end_time - start_time
+    print(f"執行API測試時間: {run_time}")
