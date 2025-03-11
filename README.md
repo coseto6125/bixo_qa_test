@@ -12,21 +12,23 @@
 
 ## 專案結構
 
+```
 .
-├── bito_api_test/ # API 測試模組
-│ ├── api/ # API 客戶端類
-│ ├── tests/ # 測試用例
-│ ├── allure-results/ # Allure 測試結果
-│ ├── allure-report/ # 生成的 Allure 報告
-│ └── conftest.py # Pytest 配置文件
-├── bito_front/ # 前端測試模組
-│ ├── report/ # 生成的報告
-│ ├── compare_bitopro_data.py # 數據比較邏輯
-│ └── bitopro_report_generator.py # 報告生成器
-├── alert_module.py # Slack 通知模組
-├── update_module.py # Google Sheets 更新模組
-├── test_main.py # 主測試執行腳本
-└── requirements.txt # 依賴項列表
+├── bito_api_test/           # API 測試模組
+│   ├── api/                 # API 客戶端類
+│   ├── tests/               # 測試用例
+│   ├── allure-results/      # Allure 測試結果
+│   ├── allure-report/       # 生成的 Allure 報告
+│   └── conftest.py          # Pytest 配置文件
+├── bito_front/              # 前端測試模組
+│   ├── report/              # 生成的報告
+│   ├── compare_bitopro_data.py  # 數據比較邏輯
+│   └── bitopro_report_generator.py  # 報告生成器
+├── alert_module.py          # Slack 通知模組
+├── update_module.py         # Google Sheets 更新模組
+├── test_main.py             # 主測試執行腳本
+└── requirements.txt         # 依賴項列表
+```
 
 ## 安裝
 
