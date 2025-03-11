@@ -1,0 +1,1310 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>BitoPro 數據比較報告</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    margin: 0;
+                    padding: 20px;
+                    color: #333;
+                }
+                h1, h2, h3 {
+                    color: #2c3e50;
+                }
+                .container {
+                    max-width: 1400px;
+                    margin: 0 auto;
+                }
+                .header {
+                    background-color: #3498db;
+                    color: white;
+                    padding: 20px;
+                    text-align: center;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                }
+                .section {
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                .table-container {
+                    width: 100%;
+                    overflow-x: auto;
+                    margin-bottom: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    padding: 12px 15px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                    word-wrap: break-word;
+                    max-width: 300px;
+                }
+                th {
+                    background-color: #3498db;
+                    color: white;
+                    white-space: normal;
+                    hyphens: auto;
+                    overflow-wrap: break-word;
+                }
+                tr:nth-child(even) {
+                    background-color: #f2f2f2;
+                }
+                .success {
+                    color: #27ae60;
+                    font-weight: bold;
+                }
+                .error {
+                    color: #e74c3c;
+                    font-weight: bold;
+                }
+                .true-value {
+                    color: #27ae60;
+                    font-weight: bold;
+                }
+                .false-value {
+                    color: #e74c3c;
+                    font-weight: bold;
+                }
+                .screenshot {
+                    max-width: 100%;
+                    height: auto;
+                    margin: 20px 0;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                .chart {
+                    max-width: 100%;
+                    height: auto;
+                    margin: 20px 0;
+                }
+                .footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    padding: 20px;
+                    background-color: #2c3e50;
+                    color: white;
+                    border-radius: 5px;
+                }
+                .collapsible {
+                    background-color: #3498db;
+                    color: white;
+                    cursor: pointer;
+                    padding: 18px;
+                    width: 100%;
+                    border: none;
+                    text-align: left;
+                    outline: none;
+                    font-size: 16px;
+                    border-radius: 5px 5px 0 0;
+                    margin-top: 10px;
+                }
+                .active, .collapsible:hover {
+                    background-color: #2980b9;
+                }
+                .content {
+                    padding: 0 18px;
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.2s ease-out;
+                    background-color: #f9f9f9;
+                    border-radius: 0 0 5px 5px;
+                    border: 1px solid #ddd;
+                    border-top: none;
+                }
+                .summary-box {
+                    background-color: #ecf0f1;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                .summary-title {
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+                .summary-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                .summary-label {
+                    font-weight: bold;
+                }
+                .summary-value {
+                    text-align: right;
+                }
+                .summary-pass {
+                    color: #27ae60;
+                }
+                .summary-fail {
+                    color: #e74c3c;
+                }
+                .draggable-table {
+                    cursor: grab;
+                    overflow: auto;
+                    max-width: 100%;
+                }
+                .draggable-table:active {
+                    cursor: grabbing;
+                }
+            </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // 折疊功能
+                    var coll = document.getElementsByClassName("collapsible");
+                    for (var i = 0; i < coll.length; i++) {
+                        coll[i].addEventListener("click", function() {
+                            this.classList.toggle("active");
+                            var content = this.nextElementSibling;
+                            if (content.style.maxHeight) {
+                                content.style.maxHeight = null;
+                            } else {
+                                content.style.maxHeight = content.scrollHeight + "px";
+                            }
+                        });
+                    }
+                    
+                    // 表格拖曳功能
+                    var draggableTables = document.getElementsByClassName('draggable-table');
+                    for (var i = 0; i < draggableTables.length; i++) {
+                        initDraggable(draggableTables[i]);
+                    }
+                    
+                    function initDraggable(element) {
+                        var pos = { top: 0, left: 0, x: 0, y: 0 };
+                        
+                        const mouseDownHandler = function(e) {
+                            element.style.cursor = 'grabbing';
+                            element.style.userSelect = 'none';
+                            
+                            pos = {
+                                left: element.scrollLeft,
+                                top: element.scrollTop,
+                                // 獲取當前滑鼠位置
+                                x: e.clientX,
+                                y: e.clientY,
+                            };
+                            
+                            document.addEventListener('mousemove', mouseMoveHandler);
+                            document.addEventListener('mouseup', mouseUpHandler);
+                        };
+                        
+                        const mouseMoveHandler = function(e) {
+                            // 計算滑鼠移動距離
+                            const dx = e.clientX - pos.x;
+                            const dy = e.clientY - pos.y;
+                            
+                            // 滾動元素
+                            element.scrollTop = pos.top - dy;
+                            element.scrollLeft = pos.left - dx;
+                        };
+                        
+                        const mouseUpHandler = function() {
+                            element.style.cursor = 'grab';
+                            element.style.removeProperty('user-select');
+                            
+                            document.removeEventListener('mousemove', mouseMoveHandler);
+                            document.removeEventListener('mouseup', mouseUpHandler);
+                        };
+                        
+                        // 綁定滑鼠事件
+                        element.addEventListener('mousedown', mouseDownHandler);
+                    }
+                    
+                    // 將True/False著色
+                    function colorTrueFalse() {
+                        var tables = document.querySelectorAll('table');
+                        tables.forEach(function(table) {
+                            var cells = table.querySelectorAll('td');
+                            cells.forEach(function(cell) {
+                                if (cell.textContent.trim() === 'True') {
+                                    cell.innerHTML = '<span class="true-value">True</span>';
+                                } else if (cell.textContent.trim() === 'False') {
+                                    cell.innerHTML = '<span class="false-value">False</span>';
+                                }
+                            });
+                        });
+                    }
+                    
+                    // 頁面加載完成後執行
+                    colorTrueFalse();
+                });
+            </script>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>BitoPro 數據比較報告</h1>
+                    <p>生成時間: 2025-03-11 22:33:40</p>
+                </div>
+        
+            <div class="section">
+                <h2>1. 下單限制表比較</h2>
+        
+                    <p>網頁表格和 API 數據的行數<span class="success"> 一致 ✓</span> (網頁: 33, API: 33)</p>
+                
+                    <button class="collapsible">網頁下單限制表 (總行數: 33) - 點擊展開/收起</button>
+                    <div class="content">
+                        <div class="draggable-table">
+                            <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>交易對</th>
+      <th>最小下單數量</th>
+      <th>最小下單位數</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ADA/TWD</td>
+      <td>0.1 ADA</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>APE/TWD</td>
+      <td>1 APE</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>BCH/TWD</td>
+      <td>0.001 BCH</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>BITO/TWD</td>
+      <td>155 BITO</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>BNB/TWD</td>
+      <td>0.01 BNB</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>BTC/TWD</td>
+      <td>0.0001 BTC</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>DOGE/TWD</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>ETH/TWD</td>
+      <td>0.0001 ETH</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>LTC/TWD</td>
+      <td>0.001 LTC</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>MV/TWD</td>
+      <td>0.01 MV</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>POL/TWD</td>
+      <td>1 POL</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>SHIB/TWD</td>
+      <td>100,000 SHIB</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>SOL/TWD</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>TON/TWD</td>
+      <td>1 TON</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>TRX/TWD</td>
+      <td>10 TRX</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>USDC/TWD</td>
+      <td>0.01 USDC</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>USDT/TWD</td>
+      <td>1 USDT</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>XRP/TWD</td>
+      <td>1 XRP</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>ADA/USDT</td>
+      <td>0.01 ADA</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>APE/USDT</td>
+      <td>1 APE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>BCH/USDT</td>
+      <td>0.001 BCH</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>BITO/USDT</td>
+      <td>155 BITO</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>BTC/USDT</td>
+      <td>0.0001 BTC</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>DOGE/USDT</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>ETH/USDT</td>
+      <td>0.0001 ETH</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>LTC/USDT</td>
+      <td>0.001 LTC</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>MV/USDT</td>
+      <td>0.01 MV</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>POL/USDT</td>
+      <td>1 POL</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>SHIB/USDT</td>
+      <td>100,000 SHIB</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td>SOL/USDT</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>TON/USDT</td>
+      <td>1 TON</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>USDC/USDT</td>
+      <td>0.01 USDC</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>ETH/BTC</td>
+      <td>0.0001 ETH</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+                        </div>
+                    </div>
+                    
+                    <button class="collapsible">API 下單限制表 (總行數: 33) - 點擊展開/收起</button>
+                    <div class="content">
+                        <div class="draggable-table">
+                            <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>交易對</th>
+      <th>最小下單數量</th>
+      <th>最小下單位數</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ADA/TWD</td>
+      <td>0.1 ADA</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>ADA/USDT</td>
+      <td>0.01 ADA</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>APE/TWD</td>
+      <td>1 APE</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>APE/USDT</td>
+      <td>1 APE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>BCH/TWD</td>
+      <td>0.001 BCH</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>BCH/USDT</td>
+      <td>0.001 BCH</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>BITO/TWD</td>
+      <td>155 BITO</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>BITO/USDT</td>
+      <td>155 BITO</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>BNB/TWD</td>
+      <td>0.01 BNB</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>BTC/TWD</td>
+      <td>0.0001 BTC</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>BTC/USDT</td>
+      <td>0.0001 BTC</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>DOGE/TWD</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>DOGE/USDT</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>ETH/BTC</td>
+      <td>0.0001 ETH</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>ETH/TWD</td>
+      <td>0.0001 ETH</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>ETH/USDT</td>
+      <td>0.0001 ETH</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>LTC/TWD</td>
+      <td>0.001 LTC</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>LTC/USDT</td>
+      <td>0.001 LTC</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>MV/TWD</td>
+      <td>0.01 MV</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>MV/USDT</td>
+      <td>0.01 MV</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>POL/TWD</td>
+      <td>1 POL</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>POL/USDT</td>
+      <td>1 POL</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>SHIB/TWD</td>
+      <td>100000 SHIB</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>SHIB/USDT</td>
+      <td>100000 SHIB</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td>SOL/TWD</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>SOL/USDT</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>TON/TWD</td>
+      <td>1 TON</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>TON/USDT</td>
+      <td>1 TON</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>TRX/TWD</td>
+      <td>10 TRX</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>USDC/TWD</td>
+      <td>0.01 USDC</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>USDC/USDT</td>
+      <td>0.01 USDC</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>USDT/TWD</td>
+      <td>1 USDT</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>XRP/TWD</td>
+      <td>1 XRP</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+                        </div>
+                    </div>
+                
+                        <button class="collapsible">完整比較結果 (總行數: 33) - 點擊展開/收起</button>
+                        <div class="content">
+                            <div class="draggable-table">
+                                <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>交易對</th>
+      <th>最小下單數量_網頁</th>
+      <th>最小下單位數_網頁</th>
+      <th>最小下單數量_API</th>
+      <th>最小下單位數_API</th>
+      <th>最小下單數量一致</th>
+      <th>最小下單位數一致</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ADA/TWD</td>
+      <td>0.1 ADA</td>
+      <td>4</td>
+      <td>0.1 ADA</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>APE/TWD</td>
+      <td>1 APE</td>
+      <td>2</td>
+      <td>1 APE</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BCH/TWD</td>
+      <td>0.001 BCH</td>
+      <td>1</td>
+      <td>0.001 BCH</td>
+      <td>1</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BITO/TWD</td>
+      <td>155 BITO</td>
+      <td>3</td>
+      <td>155 BITO</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BNB/TWD</td>
+      <td>0.01 BNB</td>
+      <td>1</td>
+      <td>0.01 BNB</td>
+      <td>1</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BTC/TWD</td>
+      <td>0.0001 BTC</td>
+      <td>0</td>
+      <td>0.0001 BTC</td>
+      <td>0</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>DOGE/TWD</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>ETH/TWD</td>
+      <td>0.0001 ETH</td>
+      <td>0</td>
+      <td>0.0001 ETH</td>
+      <td>0</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>LTC/TWD</td>
+      <td>0.001 LTC</td>
+      <td>1</td>
+      <td>0.001 LTC</td>
+      <td>1</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>MV/TWD</td>
+      <td>0.01 MV</td>
+      <td>3</td>
+      <td>0.01 MV</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>POL/TWD</td>
+      <td>1 POL</td>
+      <td>3</td>
+      <td>1 POL</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>SHIB/TWD</td>
+      <td>100,000 SHIB</td>
+      <td>6</td>
+      <td>100000 SHIB</td>
+      <td>6</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>SOL/TWD</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>TON/TWD</td>
+      <td>1 TON</td>
+      <td>2</td>
+      <td>1 TON</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>TRX/TWD</td>
+      <td>10 TRX</td>
+      <td>4</td>
+      <td>10 TRX</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>USDC/TWD</td>
+      <td>0.01 USDC</td>
+      <td>3</td>
+      <td>0.01 USDC</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>USDT/TWD</td>
+      <td>1 USDT</td>
+      <td>3</td>
+      <td>1 USDT</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>XRP/TWD</td>
+      <td>1 XRP</td>
+      <td>3</td>
+      <td>1 XRP</td>
+      <td>3</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>ADA/USDT</td>
+      <td>0.01 ADA</td>
+      <td>4</td>
+      <td>0.01 ADA</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>APE/USDT</td>
+      <td>1 APE</td>
+      <td>4</td>
+      <td>1 APE</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BCH/USDT</td>
+      <td>0.001 BCH</td>
+      <td>2</td>
+      <td>0.001 BCH</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BITO/USDT</td>
+      <td>155 BITO</td>
+      <td>4</td>
+      <td>155 BITO</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>BTC/USDT</td>
+      <td>0.0001 BTC</td>
+      <td>2</td>
+      <td>0.0001 BTC</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>DOGE/USDT</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+      <td>1 DOGE</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>ETH/USDT</td>
+      <td>0.0001 ETH</td>
+      <td>2</td>
+      <td>0.0001 ETH</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>LTC/USDT</td>
+      <td>0.001 LTC</td>
+      <td>2</td>
+      <td>0.001 LTC</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>MV/USDT</td>
+      <td>0.01 MV</td>
+      <td>5</td>
+      <td>0.01 MV</td>
+      <td>5</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>POL/USDT</td>
+      <td>1 POL</td>
+      <td>4</td>
+      <td>1 POL</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>SHIB/USDT</td>
+      <td>100,000 SHIB</td>
+      <td>8</td>
+      <td>100000 SHIB</td>
+      <td>8</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>SOL/USDT</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+      <td>0.01 SOL</td>
+      <td>2</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>TON/USDT</td>
+      <td>1 TON</td>
+      <td>4</td>
+      <td>1 TON</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>USDC/USDT</td>
+      <td>0.01 USDC</td>
+      <td>4</td>
+      <td>0.01 USDC</td>
+      <td>4</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+    <tr>
+      <td>ETH/BTC</td>
+      <td>0.0001 ETH</td>
+      <td>6</td>
+      <td>0.0001 ETH</td>
+      <td>6</td>
+      <td><span class="true-value">True</span></td>
+      <td><span class="true-value">True</span></td>
+    </tr>
+  </tbody>
+</table>
+                            </div>
+                        </div>
+                    
+                        <h4 class="success">網頁表格和 API 數據中共同存在的交易對數據完全一致!</h4>
+                    </div>
+            <div class="section">
+                <h2>2. VIP 費用等級表比較</h2>
+        
+                    <button class="collapsible">網頁 VIP 費用等級表 (總行數: 7) - 點擊展開/收起</button>
+                    <div class="content">
+                        <div class="draggable-table">
+                            <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>等級</th>
+      <th>前 30 天交易量</th>
+      <th></th>
+      <th>前 1 天持倉量</th>
+      <th>Maker / Taker</th>
+      <th>Maker / Taker (BITO 折抵 20%)</th>
+      <th>網格 Maker / Taker 手續費</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VIP 0</td>
+      <td>&lt; 3,000,000 TWD</td>
+      <td>或</td>
+      <td>&lt; 3,000 BITO</td>
+      <td>0.1% / 0.2%</td>
+      <td>0.08% / 0.16%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 1</td>
+      <td>≥ 3,000,000 TWD</td>
+      <td>或</td>
+      <td>≥ 3,000 BITO</td>
+      <td>0.09% / 0.18%</td>
+      <td>0.072% / 0.144%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 2</td>
+      <td>≥ 10,000,000 TWD</td>
+      <td>或</td>
+      <td>≥ 10,000 BITO</td>
+      <td>0.07% / 0.14%</td>
+      <td>0.056% / 0.112%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 3</td>
+      <td>≥ 30,000,000 TWD</td>
+      <td>或</td>
+      <td>≥ 20,000 BITO</td>
+      <td>0.06% / 0.12%</td>
+      <td>0.048% / 0.096%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 4</td>
+      <td>≥ 150,000,000 TWD</td>
+      <td>或</td>
+      <td>≥ 30,000 BITO</td>
+      <td>0.0125% / 0.1%</td>
+      <td>0.01% / 0.08%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 5</td>
+      <td>≥ 300,000,000 TWD</td>
+      <td>及</td>
+      <td>≥ 40,000 BITO</td>
+      <td>0.0125% / 0.0875%</td>
+      <td>0.01% / 0.07%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+    <tr>
+      <td>VIP 6</td>
+      <td>≥ 600,000,000 TWD</td>
+      <td>及</td>
+      <td>≥ 50,000 BITO</td>
+      <td>0.0125% / 0.045%</td>
+      <td>0.01% / 0.036%</td>
+      <td>0.05% / 0.05%</td>
+    </tr>
+  </tbody>
+</table>
+                        </div>
+                    </div>
+                    
+                    <button class="collapsible">API 交易費率表 (總行數: 7) - 點擊展開/收起</button>
+                    <div class="content">
+                        <div class="draggable-table">
+                            <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>rank</th>
+      <th>twdVolumeSymbol</th>
+      <th>twdVolume</th>
+      <th>bitoAmountSymbol</th>
+      <th>bitoAmount</th>
+      <th>makerFee</th>
+      <th>takerFee</th>
+      <th>makerBitoFee</th>
+      <th>takerBitoFee</th>
+      <th>rankCondition</th>
+      <th>gridBotMakerFee</th>
+      <th>gridBotTakerFee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td><</td>
+      <td>3000000</td>
+      <td><</td>
+      <td>3000</td>
+      <td>0.001</td>
+      <td>0.002</td>
+      <td>0.0008</td>
+      <td>0.0016</td>
+      <td>或</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>≥</td>
+      <td>3000000</td>
+      <td>≥</td>
+      <td>3000</td>
+      <td>0.0009</td>
+      <td>0.0018</td>
+      <td>0.00072</td>
+      <td>0.00144</td>
+      <td>或</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>≥</td>
+      <td>10000000</td>
+      <td>≥</td>
+      <td>10000</td>
+      <td>0.0007</td>
+      <td>0.0014</td>
+      <td>0.00056</td>
+      <td>0.00112</td>
+      <td>或</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>≥</td>
+      <td>30000000</td>
+      <td>≥</td>
+      <td>20000</td>
+      <td>0.0006</td>
+      <td>0.0012</td>
+      <td>0.00048</td>
+      <td>0.00096</td>
+      <td>或</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>≥</td>
+      <td>150000000</td>
+      <td>≥</td>
+      <td>30000</td>
+      <td>0.000125</td>
+      <td>0.001</td>
+      <td>0.0001</td>
+      <td>0.0008</td>
+      <td>或</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>≥</td>
+      <td>300000000</td>
+      <td>≥</td>
+      <td>40000</td>
+      <td>0.000125</td>
+      <td>0.000875</td>
+      <td>0.0001</td>
+      <td>0.0007</td>
+      <td>及</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>≥</td>
+      <td>600000000</td>
+      <td>≥</td>
+      <td>50000</td>
+      <td>0.000125</td>
+      <td>0.00045</td>
+      <td>0.0001</td>
+      <td>0.00036</td>
+      <td>及</td>
+      <td>0.0005</td>
+      <td>0.0005</td>
+    </tr>
+  </tbody>
+</table>
+                        </div>
+                    </div>
+                
+                        <button class="collapsible">比較結果詳情 - 點擊展開/收起</button>
+                        <div class="content">
+                            <div class="draggable-table">
+                                <table border="1" class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>VIP等級_網頁</th>
+      <th>VIP等級_API</th>
+      <th>等級一致</th>
+      <th>交易量_網頁</th>
+      <th>交易量_API</th>
+      <th>交易量一致</th>
+      <th>手續費_網頁</th>
+      <th>手續費_API</th>
+      <th>手續費一致</th>
+      <th>手續費_網頁(標準化)</th>
+      <th>手續費_API(標準化)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VIP 0</td>
+      <td>VIP 0</td>
+      <td><span class="true-value">True</span></td>
+      <td>&lt; 3,000,000 TWD</td>
+      <td>&lt; 3000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.1% / 0.2%</td>
+      <td>0.001 / 0.002</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.001000/0.002000</td>
+      <td>0.001000/0.002000</td>
+    </tr>
+    <tr>
+      <td>VIP 1</td>
+      <td>VIP 1</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 3,000,000 TWD</td>
+      <td>≥ 3000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.09% / 0.18%</td>
+      <td>0.0009 / 0.0018</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000900/0.001800</td>
+      <td>0.000900/0.001800</td>
+    </tr>
+    <tr>
+      <td>VIP 2</td>
+      <td>VIP 2</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 10,000,000 TWD</td>
+      <td>≥ 10000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.07% / 0.14%</td>
+      <td>0.0007 / 0.0014</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000700/0.001400</td>
+      <td>0.000700/0.001400</td>
+    </tr>
+    <tr>
+      <td>VIP 3</td>
+      <td>VIP 3</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 30,000,000 TWD</td>
+      <td>≥ 30000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.06% / 0.12%</td>
+      <td>0.0006 / 0.0012</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000600/0.001200</td>
+      <td>0.000600/0.001200</td>
+    </tr>
+    <tr>
+      <td>VIP 4</td>
+      <td>VIP 4</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 150,000,000 TWD</td>
+      <td>≥ 150000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.0125% / 0.1%</td>
+      <td>0.000125 / 0.001</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000125/0.001000</td>
+      <td>0.000125/0.001000</td>
+    </tr>
+    <tr>
+      <td>VIP 5</td>
+      <td>VIP 5</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 300,000,000 TWD</td>
+      <td>≥ 300000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.0125% / 0.0875%</td>
+      <td>0.000125 / 0.000875</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000125/0.000875</td>
+      <td>0.000125/0.000875</td>
+    </tr>
+    <tr>
+      <td>VIP 6</td>
+      <td>VIP 6</td>
+      <td><span class="true-value">True</span></td>
+      <td>≥ 600,000,000 TWD</td>
+      <td>≥ 600000000</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.0125% / 0.045%</td>
+      <td>0.000125 / 0.00045</td>
+      <td><span class="true-value">True</span></td>
+      <td>0.000125/0.000450</td>
+      <td>0.000125/0.000450</td>
+    </tr>
+  </tbody>
+</table>
+                            </div>
+                        </div>
+                        
+                        <p>網頁表格和 API 數據的行數一致</p>
+                    
+                        <h4 class="success">
+                            所有 VIP 等級數據一致!
+                        </h4>
+                    </div>
+            <div class="section">
+                <h2>3. 數據一致性總結</h2>
+        
+            <div class="summary-box">
+                <div class="summary-title">測試結果摘要</div>
+                <div class="summary-item">
+                    <span class="summary-label">總檢查項目:</span>
+                    <span class="summary-value">89</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">通過項目:</span>
+                    <span class="summary-value summary-pass">89 (100.0%)</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">失敗項目:</span>
+                    <span class="summary-value summary-fail">0 (0.0%)</span>
+                </div>
+            </div>
+        
+            <p>網頁表格數量: 2</p>
+        
+                <p>下單限制表行數: <span class="success"> 一致 ✓</span></p>
+            
+                    <p class="success">下單限制表: 網頁和 API 數據一致 ✓</p>
+                
+                            <p class="success">VIP 費用等級表: 網頁和 API 數據一致 (標準化後) ✓</p>
+                            <p>注意: 網頁顯示的是百分比形式 (如 0.1%)，而 API 返回的是小數形式 (如 0.001)</p>
+                        </div>
+                <div class="footer">
+                    <p>BitoPro 數據比較報告 | 生成時間: 2025-03-11 22:33:40</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        

@@ -1,0 +1,15 @@
+# API 測試相關
+aiohttp==3.10.15
+pytest==8.3.4
+pytest-asyncio==0.25.3
+allure-pytest==2.13.5
+orjson==3.9.10
+
+# 前端測試相關
+playwright==1.50.0
+pandas==2.2.3
+
+# 報告和通知相關
+pygsheets==2.0.6
+loguru==0.7.3
+attrs==23.1.0
